@@ -182,3 +182,40 @@ export const forceDeleteStaff = async (req, res) => {
     })
   }
 }
+
+export const restoreStaff = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: user, error: fetchError } = await supabase
+      .from('system_users')
+      .select('name, is_deleted')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !user) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    if (!user.is_deleted) {
+      return res.status(400).json({ msg: "User is not deleted" })
+    }
+
+    // Memperbarui data user
+    const { error: updateError } = await supabase
+      .from('system_users')
+      .update({ is_deleted: false })
+      .eq('id', id)
+
+    if (updateError) {
+      throw updateError
+    }
+
+    res.status(200).json({ msg: `Restored a staff account with the name ${user.name} successfully` })
+  } catch (error) {
+    res.status(400).json({
+      msg: `Failed to restore a staff account`,
+      err: error.message
+    })
+  }
+}

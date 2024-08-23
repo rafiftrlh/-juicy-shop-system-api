@@ -33,3 +33,17 @@ export const getSystemUserById = async (req, res) => {
     })
   }
 }
+
+export const getAllStaff = async (req, res) => {
+  try {
+    const users = await supabase.from("system_users").select().not('role', 'eq', 'admin')
+
+    res.status(200).json(users.data)
+  } catch (error) {
+    console.error(`Error fetching user: ${error}`)
+    res.status(500).json({
+      msg: "Internal server error",
+      err: error.message
+    })
+  }
+}

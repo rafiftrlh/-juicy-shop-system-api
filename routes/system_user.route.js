@@ -1,10 +1,10 @@
 import express from "express"
-import { getAllSystemUser, getSystemUserById } from "../controllers/system_user.controller.js"
+import { getAllStaff, getAllSystemUser, getSystemUserById } from "../controllers/system_user.controller.js"
 
 const router = express.Router()
 
 router.get("/", getAllSystemUser)
-// router.get("/get-all-staff", getAllStaff)
+router.get("/get-all-staff", getAllStaff)
 router.get("/:id", getSystemUserById)
 // router.post("/", createStaff)
 // router.patch("/:id", updateStaff)

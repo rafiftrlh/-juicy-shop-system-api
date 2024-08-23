@@ -5,7 +5,7 @@ const saltRounds = 10
 
 export const getAllSystemUser = async (req, res) => {
   try {
-    const users = await supabase.from("system_users").select()
+    const users = await supabase.from("system_users").select().order('created_at', { ascending: true })
 
     res.status(200).json(users.data)
   } catch (error) {
@@ -39,7 +39,7 @@ export const getSystemUserById = async (req, res) => {
 
 export const getAllStaff = async (req, res) => {
   try {
-    const users = await supabase.from("system_users").select().not("role", "eq", "admin")
+    const users = await supabase.from("system_users").select().not("role", "eq", "admin").order('created_at', { ascending: true })
 
     res.status(200).json(users.data)
   } catch (error) {
@@ -111,6 +111,74 @@ export const updateStaff = async (req, res) => {
     res.status(500).json({
       msg: "Failed to update staff",
       err: error.message,
+    })
+  }
+}
+
+export const softDeleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: user, error: fetchError } = await supabase
+      .from('system_users')
+      .select('name, role')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !user) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    if (user.role === "admin") {
+      return res.status(403).json({ msg: "Cannot delete admin user" })
+    }
+
+    const { error: updateError } = await supabase
+      .from('system_users')
+      .update({ is_deleted: true })
+      .eq('id', id)
+
+    if (updateError) throw updateError
+
+    res.status(200).json({ msg: `Soft deleted a staff account with the name ${user.name} successfully` })
+  } catch (error) {
+    res.status(400).json({
+      msg: `Failed to soft delete a staff account`,
+      err: error.message
+    })
+  }
+}
+
+export const forceDeleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: user, error: fetchError } = await supabase
+      .from('system_users')
+      .select('name, role')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !user) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    if (user.role === "admin") {
+      return res.status(403).json({ msg: "Cannot delete admin user" })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('system_users')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) throw deleteError
+
+    res.status(200).json({ msg: `Force deleted a staff account with the name ${user.name} successfully` })
+  } catch (error) {
+    return res.status(400).json({
+      msg: `Failed to force delete a staff account`,
+      err: error.message
     })
   }
 }

@@ -36,6 +36,23 @@ Create a .env file in the root directory of your project and add your Supabase c
   ```
 
 ### Database Setup
+1. **Enable the pgcrypto extension for UUIDs:**
+
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  ```
+
+2. **Create a function to update timestamp:**
+
+  ```sql
+  CREATE OR REPLACE FUNCTION update_timestamp()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+  ```
 
 1. **Create ENUM Types:**
 
@@ -52,15 +69,22 @@ Create a .env file in the root directory of your project and add your Supabase c
   ```sql
   -- Tabel system_users
   CREATE TABLE IF NOT EXISTS system_users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role role_enum NOT NULL,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role role_enum NOT NULL,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );
+
+  CREATE TRIGGER update_system_users_timestamp
+  BEFORE UPDATE ON system_users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE system_users REPLICA IDENTITY FULL;
 
   -- Tabel members
   CREATE TABLE IF NOT EXISTS members (
@@ -70,9 +94,16 @@ Create a .env file in the root directory of your project and add your Supabase c
     phone VARCHAR(15) NOT NULL,
     status member_status_enum NOT NULL,
     balance DECIMAL(10, 2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );
+
+  CREATE TRIGGER update_members_timestamp
+  BEFORE UPDATE ON members
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE members REPLICA IDENTITY FULL;
 
   -- Tabel juices
   CREATE TABLE IF NOT EXISTS juices (
@@ -80,9 +111,16 @@ Create a .env file in the root directory of your project and add your Supabase c
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     image_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );
+
+  CREATE TRIGGER update_juices_timestamp
+  BEFORE UPDATE ON juices
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE juices REPLICA IDENTITY FULL;
 
   -- Tabel categories
   CREATE TABLE IF NOT EXISTS categories (
@@ -91,6 +129,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TRIGGER update_categories_timestamp
+  BEFORE UPDATE ON categories
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE categories REPLICA IDENTITY FULL;
 
   -- Tabel inventory
   CREATE TABLE IF NOT EXISTS inventory (
@@ -101,6 +146,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TRIGGER update_inventory_timestamp
+  BEFORE UPDATE ON inventory
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE inventory REPLICA IDENTITY FULL;
 
   -- Tabel orders
   CREATE TABLE IF NOT EXISTS orders (
@@ -113,6 +165,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     updated_at TIMESTAMP DEFAULT NOW()
   );
 
+  CREATE TRIGGER update_orders_timestamp
+  BEFORE UPDATE ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE orders REPLICA IDENTITY FULL;
+
   -- Tabel order_items
   CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
@@ -123,6 +182,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TRIGGER update_order_items_timestamp
+  BEFORE UPDATE ON order_items
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE order_items REPLICA IDENTITY FULL;
 
   -- Tabel inventory_logs
   CREATE TABLE IF NOT EXISTS inventory_logs (
@@ -136,6 +202,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     updated_at TIMESTAMP DEFAULT NOW()
   );
 
+  CREATE TRIGGER update_inventory_logs_timestamp
+  BEFORE UPDATE ON inventory_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE inventory_logs REPLICA IDENTITY FULL;
+
   -- Tabel order_transaction_logs
   CREATE TABLE IF NOT EXISTS order_transaction_logs (
     id SERIAL PRIMARY KEY,
@@ -147,6 +220,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     updated_at TIMESTAMP DEFAULT NOW()
   );
 
+  CREATE TRIGGER update_order_transaction_logs_timestamp
+  BEFORE UPDATE ON order_transaction_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE order_transaction_logs REPLICA IDENTITY FULL;
+
   -- Tabel member_topup_logs
   CREATE TABLE IF NOT EXISTS member_topup_logs (
     id SERIAL PRIMARY KEY,
@@ -156,6 +236,13 @@ Create a .env file in the root directory of your project and add your Supabase c
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
+
+  CREATE TRIGGER update_member_topup_logs_timestamp
+  BEFORE UPDATE ON member_topup_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE member_topup_logs REPLICA IDENTITY FULL;
   ```
 
 ### Running the Application

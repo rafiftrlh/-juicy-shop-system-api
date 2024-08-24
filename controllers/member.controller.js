@@ -17,3 +17,22 @@ export const getAllMember = async (req, res) => {
   }
 }
 
+export const getMemberById = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: member } = await supabase.from("members").select().eq("id", id).single()
+
+    if (!member) {
+      return res.status(404).json({ msg: "Member not found" })
+    }
+
+    res.status(200).json(member)
+  } catch (error) {
+    console.error(`Error fetching member: ${error}`)
+    res.status(500).json({
+      msg: "Internal server error",
+      err: error.message
+    })
+  }
+}

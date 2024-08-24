@@ -7,6 +7,7 @@ import { Server } from "socket.io"
 import setupWebSocket from "./services/websocket.js"
 
 import systemUserRoute from "./routes/system_user.route.js"
+import memberRoute from "./routes/member.route.js"
 
 const app = express()
 dotenv.config()
@@ -17,6 +18,7 @@ app.use(cors())
 app.use(express.json())
 
 app.use("/api/system-user", systemUserRoute)
+app.use("/api/member", memberRoute)
 
 const server = http.createServer(app)
 const io = new Server(server, {

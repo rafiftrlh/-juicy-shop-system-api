@@ -36,3 +36,25 @@ export const getMemberById = async (req, res) => {
     })
   }
 }
+
+export const createMember = async (req, res) => {
+  try {
+    const { name, password, phone, balance } = req.body
+    const hashPassword = await bcrypt.hash(password, saltRounds)
+
+    const { data: newMember } = await supabase.from("members").insert({
+      name,
+      password: hashPassword,
+      phone,
+      balance,
+      status: "active"
+    }).select()
+
+    res.status(201).json({ msg: `Created a member account with the name ${name} successfully`, member: newMember })
+  } catch (error) {
+    res.status(400).json({
+      msg: `Failed to create a member account`,
+      err: error.message
+    })
+  }
+}

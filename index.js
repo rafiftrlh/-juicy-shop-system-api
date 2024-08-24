@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 import http from "http"
 import { Server } from "socket.io"
 
-import setupWebSocket from "./services/websocket"
+import setupWebSocket from "./services/websocket.js"
 
 import systemUserRoute from "./routes/system_user.route.js"
 

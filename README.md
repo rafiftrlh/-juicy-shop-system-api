@@ -69,14 +69,14 @@ Create a .env file in the root directory of your project and add your Supabase c
   ```sql
   -- Tabel system_users
   CREATE TABLE IF NOT EXISTS system_users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  role role_enum NOT NULL,
-  is_deleted BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role role_enum NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );
 
   CREATE TRIGGER update_system_users_timestamp
@@ -197,7 +197,7 @@ Create a .env file in the root directory of your project and add your Supabase c
     quantity_changed INT NOT NULL,
     action inventory_action_enum NOT NULL,
     reason VARCHAR(255),
-    changed_by INT REFERENCES system_users(id) ON DELETE SET NULL,
+    changed_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
@@ -215,7 +215,7 @@ Create a .env file in the root directory of your project and add your Supabase c
     order_id INT REFERENCES orders(id) ON DELETE CASCADE,
     amount DECIMAL(10, 2) NOT NULL,
     transaction_type transaction_type_enum NOT NULL,
-    changed_by INT REFERENCES system_users(id) ON DELETE SET NULL,
+    changed_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
@@ -232,7 +232,7 @@ Create a .env file in the root directory of your project and add your Supabase c
     id SERIAL PRIMARY KEY,
     member_id VARCHAR(36) REFERENCES members(id) ON DELETE CASCADE,
     amount DECIMAL(10, 2) NOT NULL,
-    processed_by INT REFERENCES system_users(id) ON DELETE SET NULL,
+    processed_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );

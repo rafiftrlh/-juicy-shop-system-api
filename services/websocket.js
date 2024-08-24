@@ -1,4 +1,4 @@
-import supabase from "./supabase_client"
+import supabase from "./supabase_client.js"
 
 const TABLES_TO_WATCH = [
   'system_users',

@@ -5,9 +5,9 @@ const saltRounds = 10
 
 export const getAllSystemUser = async (req, res) => {
   try {
-    const users = await supabase.from("system_users").select().order('created_at', { ascending: true })
+    const { data: users } = await supabase.from("system_users").select().order('created_at', { ascending: true })
 
-    res.status(200).json(users.data)
+    res.status(200).json(users)
   } catch (error) {
     console.error("Error fetching users: ", error)
     res.status(500).json({
@@ -21,13 +21,13 @@ export const getSystemUserById = async (req, res) => {
   try {
     const { id } = req.params
 
-    const user = await supabase.from("system_users").select().eq("id", id).single()
+    const { data: user } = await supabase.from("system_users").select().eq("id", id).single()
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" })
     }
 
-    res.status(200).json(user.data)
+    res.status(200).json(user)
   } catch (error) {
     console.error(`Error fetching user: ${error}`)
     res.status(500).json({
@@ -39,9 +39,9 @@ export const getSystemUserById = async (req, res) => {
 
 export const getAllStaff = async (req, res) => {
   try {
-    const users = await supabase.from("system_users").select().not("role", "eq", "admin").order('created_at', { ascending: true })
+    const { data: users } = await supabase.from("system_users").select().not("role", "eq", "admin").order('created_at', { ascending: true })
 
-    res.status(200).json(users.data)
+    res.status(200).json(users)
   } catch (error) {
     console.error(`Error fetching user: ${error}`)
     res.status(500).json({

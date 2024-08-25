@@ -48,3 +48,39 @@ export const createCategory = async (req, res) => {
     })
   }
 }
+
+export const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name } = req.body
+
+    const { data: existingCategory, error: fetchError } = await supabase
+      .from("categories")
+      .select()
+      .eq("id", id)
+      .single()
+
+    if (fetchError || !existingCategory) {
+      return res.status(404).json({ msg: "Category not found" });
+    }
+
+    let updatedData = { name }
+
+    const { data: updatedCategory } = await supabase
+      .from("categories")
+      .update(updatedData)
+      .eq("id", id)
+      .select("name")
+
+    res.status(200).json({
+      msg: "Category successfully updated",
+      category: updatedCategory,
+    })
+  } catch (error) {
+    console.error(`Error updating category: ${error}`)
+    res.status(500).json({
+      msg: "Failed to update category",
+      err: error.message,
+    })
+  }
+}

@@ -54,7 +54,7 @@ Create a .env file in the root directory of your project and add your Supabase c
   $$ LANGUAGE plpgsql;
   ```
 
-1. **Create ENUM Types:**
+3. **Create ENUM Types:**
 
   ```sql
   CREATE TYPE role_enum AS ENUM ('admin', 'cashier', 'juicer', 'warehouse');
@@ -64,7 +64,7 @@ Create a .env file in the root directory of your project and add your Supabase c
   CREATE TYPE transaction_type_enum AS ENUM ('payment', 'refund');
   ```
 
-2. **Create Tables:**
+4. **Create Tables:**
 
   ```sql
   -- Tabel system_users
@@ -88,7 +88,7 @@ Create a .env file in the root directory of your project and add your Supabase c
 
   -- Tabel members
   CREATE TABLE IF NOT EXISTS members (
-    id VARCHAR(36) PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(15) NOT NULL,
@@ -158,7 +158,7 @@ Create a .env file in the root directory of your project and add your Supabase c
   CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     order_by VARCHAR(255) NOT NULL,
-    member_id VARCHAR(36) REFERENCES members(id) ON DELETE SET NULL,
+    member_id UUID REFERENCES members(id) ON DELETE SET NULL,
     order_status order_status_enum NOT NULL,
     subtotal INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -230,7 +230,7 @@ Create a .env file in the root directory of your project and add your Supabase c
   -- Tabel member_topup_logs
   CREATE TABLE IF NOT EXISTS member_topup_logs (
     id SERIAL PRIMARY KEY,
-    member_id VARCHAR(36) REFERENCES members(id) ON DELETE CASCADE,
+    member_id UUID REFERENCES members(id) ON DELETE CASCADE,
     amount DECIMAL(10, 2) NOT NULL,
     processed_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -266,3 +266,5 @@ Open your browser and navigate to http://localhost:3000.
 - Express.js: A web application framework for Node.js.
 - Supabase: An open-source Firebase alternative for database management.
 - PostgreSQL: The database system used by Supabase.
+- Socket.IO: A library for real-time communication between clients and servers over WebSocket.
+- HTTP: The underlying protocol used to transfer data between the server and client, often paired with Socket.IO for establishing connections.

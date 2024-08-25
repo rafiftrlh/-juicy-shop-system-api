@@ -58,3 +58,43 @@ export const createMember = async (req, res) => {
     })
   }
 }
+
+export const updateMember = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name, password, phone, balance, status } = req.body
+
+    const { data: existingMember, error: fetchError } = await supabase
+      .from("members")
+      .select()
+      .eq("id", id)
+      .single()
+
+    if (fetchError || !existingMember) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    let updatedData = { name, password, phone, balance, status }
+    if (password) {
+      const hashPassword = await bcrypt.hash(password, saltRounds)
+      updatedData.password = hashPassword
+    }
+
+    const { data: updatedMember } = await supabase
+      .from("members")
+      .update(updatedData)
+      .eq("id", id)
+      .select("name, password, phone, status, balance")
+
+    res.status(200).json({
+      msg: "member successfully updated",
+      member: updatedMember,
+    })
+  } catch (error) {
+    console.error(`Error updating member: ${error}`)
+    res.status(500).json({
+      msg: "Failed to update member",
+      err: error.message,
+    })
+  }
+}

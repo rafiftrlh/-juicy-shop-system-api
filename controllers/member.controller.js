@@ -98,3 +98,33 @@ export const updateMember = async (req, res) => {
     })
   }
 }
+
+export const deleteMember = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: member, error: fetchError } = await supabase
+      .from('members')
+      .select('name')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !member) {
+      return res.status(404).json({ msg: "Member not found" })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('members')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) throw deleteError
+
+    res.status(200).json({ msg: `Deleted a member account with the name ${member.name} successfully` })
+  } catch (error) {
+    return res.status(400).json({
+      msg: `Failed to delete a member account`,
+      err: error.message
+    })
+  }
+}

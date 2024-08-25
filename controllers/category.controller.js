@@ -13,3 +13,18 @@ export const getAllCategory = async (req, res) => {
     })
   }
 }
+
+export const createCategory = async (req, res) => {
+  try {
+    const { name } = req.body
+
+    const { data: newCategory } = await supabase.from("categories").insert({ name }).select()
+
+    res.status(201).json({ msg: `Created a category with the name ${name} successfully`, category: newCategory })
+  } catch (error) {
+    res.status(400).json({
+      msg: `Failed to create a category`,
+      err: error.message
+    })
+  }
+}

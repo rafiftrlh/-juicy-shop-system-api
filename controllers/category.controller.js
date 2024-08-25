@@ -84,3 +84,33 @@ export const updateCategory = async (req, res) => {
     })
   }
 }
+
+export const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: category, error: fetchError } = await supabase
+      .from('categories')
+      .select('name')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !category) {
+      return res.status(404).json({ msg: "Category not found" })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) throw deleteError
+
+    res.status(200).json({ msg: `Successfully delete the ${category.name} category` })
+  } catch (error) {
+    return res.status(400).json({
+      msg: `Failed to delete category`,
+      err: error.message
+    })
+  }
+}

@@ -14,6 +14,26 @@ export const getAllCategory = async (req, res) => {
   }
 }
 
+export const getCategoryById = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: category } = await supabase.from("categories").select().eq("id", id).single()
+
+    if (!category) {
+      return res.status(404).json({ msg: "Category not found" })
+    }
+
+    res.status(200).json(category)
+  } catch (error) {
+    console.error(`Error fetching category: ${error}`)
+    res.status(500).json({
+      msg: "Internal server error",
+      err: error.message
+    })
+  }
+}
+
 export const createCategory = async (req, res) => {
   try {
     const { name } = req.body

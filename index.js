@@ -8,7 +8,9 @@ import setupWebSocket from "./services/websocket.js"
 
 import systemUserRoute from "./routes/system_user.route.js"
 import memberRoute from "./routes/member.route.js"
+import authRoute from "./routes/auth.route.js"
 import categoryRoute from "./routes/category.route.js"
+import session from "express-session"
 
 const app = express()
 dotenv.config()
@@ -17,9 +19,16 @@ const PORT = process.env.PORT || 3000
 
 app.use(cors())
 app.use(express.json())
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}))
 
 app.use("/api/system-user", systemUserRoute)
 app.use("/api/member", memberRoute)
+app.use("/api/auth", authRoute)
 app.use("/api/category", categoryRoute)
 
 const server = http.createServer(app)

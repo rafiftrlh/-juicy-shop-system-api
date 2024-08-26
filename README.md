@@ -61,7 +61,6 @@ Create a .env file in the root directory of your project and add your Supabase c
   CREATE TYPE member_status_enum AS ENUM ('active', 'inactive');
   CREATE TYPE order_status_enum AS ENUM ('waiting', 'cooking', 'ready to pick', 'done',  'cancelled');
   CREATE TYPE inventory_action_enum AS ENUM ('in', 'out');
-  CREATE TYPE transaction_type_enum AS ENUM ('payment', 'refund');
   ```
 
 4. **Create Tables:**
@@ -69,14 +68,14 @@ Create a .env file in the root directory of your project and add your Supabase c
   ```sql
   -- Tabel system_users
   CREATE TABLE IF NOT EXISTS system_users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role role_enum NOT NULL,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role role_enum NOT NULL,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );
 
   CREATE TRIGGER update_system_users_timestamp
@@ -122,23 +121,6 @@ Create a .env file in the root directory of your project and add your Supabase c
 
   ALTER TABLE juices REPLICA IDENTITY FULL;
 
-  -- Tabel juice_ingredients
-  CREATE TABLE IF NOT EXISTS juice_ingredients (
-    id SERIAL PRIMARY KEY,
-    juice_id INT REFERENCES juices(id) ON DELETE CASCADE,
-    inventory_id INT REFERENCES inventory(id) ON DELETE CASCADE,
-    quantity DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
-  );
-
-  CREATE TRIGGER update_juice_ingredients_timestamp
-  BEFORE UPDATE ON juice_ingredients
-  FOR EACH ROW
-  EXECUTE FUNCTION update_timestamp();
-
-  ALTER TABLE juice_ingredients REPLICA IDENTITY FULL;
-
   -- Tabel categories
   CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
@@ -171,13 +153,30 @@ Create a .env file in the root directory of your project and add your Supabase c
 
   ALTER TABLE inventory REPLICA IDENTITY FULL;
 
+  -- Tabel juice_ingredients
+  CREATE TABLE IF NOT EXISTS juice_ingredients (
+    id SERIAL PRIMARY KEY,
+    juice_id INT REFERENCES juices(id) ON DELETE CASCADE,
+    inventory_id INT REFERENCES inventory(id) ON DELETE CASCADE,
+    quantity INT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+  );
+
+  CREATE TRIGGER update_juice_ingredients_timestamp
+  BEFORE UPDATE ON juice_ingredients
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE juice_ingredients REPLICA IDENTITY FULL;
+
   -- Tabel orders
   CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     order_by VARCHAR(255) NOT NULL,
     member_id UUID REFERENCES members(id) ON DELETE SET NULL,
     order_status order_status_enum NOT NULL,
-    subtotal INT NOT NULL,
+    subtotal DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
@@ -195,7 +194,8 @@ Create a .env file in the root directory of your project and add your Supabase c
     order_id INT REFERENCES orders(id) ON DELETE CASCADE,
     juice_id INT REFERENCES juices(id) ON DELETE CASCADE,
     quantity INT NOT NULL,
-    price INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    sum_price DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );
@@ -230,9 +230,10 @@ Create a .env file in the root directory of your project and add your Supabase c
   CREATE TABLE IF NOT EXISTS order_transaction_logs (
     id SERIAL PRIMARY KEY,
     order_id INT REFERENCES orders(id) ON DELETE CASCADE,
-    amount DECIMAL(10, 2) NOT NULL,
-    transaction_type transaction_type_enum NOT NULL,
-    changed_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    payment_amount DECIMAL(10, 2) NOT NULL,
+    amount_returned DECIMAL(10, 2) NOT NULL,
+    served_by UUID REFERENCES system_users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
   );

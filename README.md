@@ -122,6 +122,23 @@ Create a .env file in the root directory of your project and add your Supabase c
 
   ALTER TABLE juices REPLICA IDENTITY FULL;
 
+  -- Tabel juice_ingredients
+  CREATE TABLE IF NOT EXISTS juice_ingredients (
+    id SERIAL PRIMARY KEY,
+    juice_id INT REFERENCES juices(id) ON DELETE CASCADE,
+    inventory_id INT REFERENCES inventory(id) ON DELETE CASCADE,
+    quantity DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+  );
+
+  CREATE TRIGGER update_juice_ingredients_timestamp
+  BEFORE UPDATE ON juice_ingredients
+  FOR EACH ROW
+  EXECUTE FUNCTION update_timestamp();
+
+  ALTER TABLE juice_ingredients REPLICA IDENTITY FULL;
+
   -- Tabel categories
   CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,

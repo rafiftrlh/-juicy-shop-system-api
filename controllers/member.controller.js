@@ -128,3 +128,59 @@ export const deleteMember = async (req, res) => {
     })
   }
 }
+
+export const topUp = async (req, res) => {
+  try {
+    const { member_id, amount } = req.body
+    const processed_by = req.session.user.id
+
+    const { data: member, error: fetchError } = await supabase
+      .from("members")
+      .select("balance")
+      .eq("id", member_id)
+      .single()
+
+    if (fetchError || !member) {
+      return res.status(404).json({ msg: "Member not found" })
+    }
+
+    const newBalance = member.balance + amount
+
+    const { data: updatedMember, error: updateError } = await supabase
+      .from("members")
+      .update({ balance: newBalance })
+      .eq("id", member_id)
+      .select("name, balance")
+      .single()
+
+    if (updateError) {
+      throw new Error("Failed to update member balance")
+    }
+
+    const { error: logError } = await supabase
+      .from("member_topup_logs")
+      .insert({
+        member_id,
+        amount,
+        processed_by
+      })
+
+    if (logError) {
+      throw new Error("Failed to log top-up transaction")
+    }
+
+    return res.status(200).json({
+      msg: "Top up successful",
+      data: {
+        name: updatedMember.name,
+        newBalance: updatedMember.balance
+      }
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Failed to top up",
+      err: error.message,
+    })
+  }
+}

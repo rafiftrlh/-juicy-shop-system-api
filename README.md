@@ -263,6 +263,34 @@ Create a .env file in the root directory of your project and add your Supabase c
   ALTER TABLE member_topup_logs REPLICA IDENTITY FULL;
   ```
 
+5. **Create Bucket**
+  ```sql
+  -- Create a new bucket named 'images'
+  INSERT INTO storage.buckets (id, name, public)
+  VALUES ('images', 'images', true);
+
+  -- Set a public access policy for bucket 'images'
+  CREATE POLICY "Public Access"
+  ON storage.objects FOR SELECT
+  USING ( bucket_id = 'images' );
+  ```
+
+6. **Storage Policies**
+   1. Go to the “Storage” section.
+   2. Select the “Policies” tab in the “Configuration” section.
+   3. Click “New Policy” in the “images” section.
+   4. Select “Create a policy from scratch”.
+   5. Fill out the policy form with the following information:
+     
+      - Policy name: Allow image uploads
+      - Allowed operation: INSERT
+      - Policy definition:
+        ```sql
+        bucket_id = 'images'::text
+        ```
+   6. Click “Review” and then “Save policy”.
+
+
 ### Running the Application
 
 1. **Start the server:**

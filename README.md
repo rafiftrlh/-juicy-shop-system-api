@@ -110,6 +110,7 @@ Create a .env file in the root directory of your project and add your Supabase c
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     image_url VARCHAR(255),
+    is_available BOOLEAN default true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
   );

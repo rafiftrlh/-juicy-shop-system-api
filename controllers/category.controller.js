@@ -40,7 +40,7 @@ export const createCategory = async (req, res) => {
 
     const { data: newCategory } = await supabase.from("categories").insert({ name }).select()
 
-    res.status(201).json({ msg: `Created a category with the name ${name} successfully`, category: newCategory })
+    res.status(201).json({ msg: `Created a category with the name ${name} successfully`, category: newCategory[0] })
   } catch (error) {
     res.status(400).json({
       msg: `Failed to create a category`,
@@ -74,7 +74,7 @@ export const updateCategory = async (req, res) => {
 
     res.status(200).json({
       msg: "Category successfully updated",
-      category: updatedCategory,
+      category: updatedCategory[0],
     })
   } catch (error) {
     console.error(`Error updating category: ${error}`)

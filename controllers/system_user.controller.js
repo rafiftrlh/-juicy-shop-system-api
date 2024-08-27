@@ -60,14 +60,14 @@ export const createStaff = async (req, res) => {
       return res.status(400).json({ msg: "Role admin is not allowed for staff accounts." });
     }
 
-    const newUser = await supabase.from("system_users").insert({
+    const { data: newStaff } = await supabase.from("system_users").insert({
       name,
       email,
       password: hashPassword,
       role,
     }).select()
 
-    res.status(201).json({ msg: `Created a staff account with the name ${name} successfully`, user: newUser.data })
+    res.status(201).json({ msg: `Created a staff account with the name ${name} successfully`, newStaff })
   } catch (error) {
     res.status(400).json({
       msg: `Failed to create a staff account`,

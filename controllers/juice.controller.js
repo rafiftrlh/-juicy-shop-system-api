@@ -1,7 +1,7 @@
 import supabase from "../services/supabase_client.js"
 import { v4 as uuidv4 } from 'uuid'
 
-async function checkJuiceAvailability(juiceId) {
+export const checkJuiceAvailability = async (juiceId) => {
   const { data: juice, error: juiceError } = await supabase
     .from('juices')
     .select(`

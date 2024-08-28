@@ -12,6 +12,7 @@ import memberRoute from "./routes/member.route.js"
 import authRoute from "./routes/auth.route.js"
 import categoryRoute from "./routes/category.route.js"
 import juiceRoute from "./routes/juice.route.js"
+import juiceIngredientRoute from "./routes/juice_ingredient.route.js"
 import inventoryRoute from "./routes/inventory.route.js"
 
 const app = express()
@@ -32,6 +33,7 @@ app.use("/api/member", express.json(), memberRoute)
 app.use("/api/auth", express.json(), authRoute)
 app.use("/api/category", express.json(), categoryRoute)
 app.use("/api/juice", juiceRoute)
+app.use("/api/juice-ingredient", express.json(), juiceIngredientRoute)
 app.use("/api/inventory", express.json(), inventoryRoute)
 
 const server = http.createServer(app)

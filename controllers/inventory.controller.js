@@ -37,3 +37,48 @@ export const createInventory = async (req, res) => {
     })
   }
 }
+
+export const deleteInventory = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { changed_by } = req.body
+
+    const { data: currentInventory, error: fetchError } = await supabase
+      .from('inventory')
+      .select()
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !currentInventory) {
+      return res.status(404).json({ msg: "Item not found" })
+    }
+
+    const { error: logError } = await supabase
+      .from('inventory_logs')
+      .insert({
+        inventory_id: id,
+        action: 'delete',
+        reason: 'Inventory deleted',
+        changed_by
+      })
+
+    if (logError) throw logError
+
+    const { error: deleteError } = await supabase
+      .from('inventory')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) throw deleteError
+
+    return res.status(200).json({
+      msg: "Item successfully delete from inventory "
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Failed to delete an item from inventory",
+      err: error.message,
+    })
+  }
+}

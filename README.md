@@ -237,7 +237,7 @@ Create a .env file in the root directory of your project and add your Supabase c
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     sum_price DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('utc'::text, NOW())
   );
 
   -- Tabel member_topup_logs

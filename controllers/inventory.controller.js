@@ -15,7 +15,7 @@ export const createInventory = async (req, res) => {
     const { error: logError } = await supabase
       .from('inventory_logs')
       .insert({
-        inventory_id: inventoryData.id,
+        name: name,
         quantity_changed: quantity,
         action: 'in',
         reason: 'Initial inventory',
@@ -56,7 +56,8 @@ export const deleteInventory = async (req, res) => {
     const { error: logError } = await supabase
       .from('inventory_logs')
       .insert({
-        inventory_id: id,
+        name: currentInventory.name,
+        quantity_changed: currentInventory.quantity,
         action: 'delete',
         reason: 'Inventory deleted',
         changed_by
